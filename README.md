@@ -28,14 +28,13 @@ If it doesnt work use
 python -m pip install -r requirements.txt
 ```
 ### 2. Data Preparation
-Download the 3D KITTI detection dataset from [here](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_velodyne.zip).  
-You need to Login First to do so. Once logged in, download the velodyne data from object->bird_view section  
+Download the 3D KITTI detection dataset from links below.  
 The downloaded data includes:
-- Velodyne point clouds( 29 GB)
-- Training labels of objects data set(5 MB)
-- Camera calibration matrices of object data set(16 MB)
-- Left color images of object data set(12 GB)
-Construct them according to the folder structure below
+- [Velodyne point clouds( 29 GB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_velodyne.zip)
+- [Training labels of objects data set(5 MB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_label_2.zip)
+- [Camera calibration matrices of object data set(16 MB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_calib.zip)
+- [Left color images of object data set(12 GB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_image_2.zip)
+Construct them according to the folder structure given below
 
 ### 3. Run Code
 **1. Visualize the data**  
