@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import LambdaLR
 import matplotlib.pyplot as plt
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)

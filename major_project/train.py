@@ -13,7 +13,7 @@ import torch.distributed as dist
 from tqdm import tqdm
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -30,6 +30,8 @@ from losses.losses import Compute_Loss
 
 def main():
     configs = parse_train_configs()
+    train_path = 'D:/downloads_d/Jnaved/plot/training_loss.txt'
+    val_path = 'D:/downloads_d/Jnaved/plot/validation_loss.txt'
 
     # Re-produce results
     if configs.seed is not None:
@@ -41,10 +43,10 @@ def main():
 
     if configs.gpu_idx is not None:
         print('You have chosen a specific GPU. This will completely disable data parallelism.')
-    main_worker(configs.gpu_idx, configs)
+    main_worker(configs.gpu_idx, configs, train_path, val_path)
 
 
-def main_worker(gpu_idx, configs):
+def main_worker(gpu_idx, configs, train_path, val_path):
     configs.gpu_idx = gpu_idx
     configs.device = torch.device('cpu' if configs.gpu_idx is None else 'cuda:{}'.format(configs.gpu_idx))
     # print(configs.device)
@@ -102,12 +104,14 @@ def main_worker(gpu_idx, configs):
             logger.info('>>> Epoch: [{}/{}]'.format(epoch, configs.num_epochs))
 
         # train for one epoch
-        train_one_epoch(train_dataloader, model, optimizer, lr_scheduler, epoch, configs, logger, tb_writer)
+        train_one_epoch(train_dataloader, model, optimizer, lr_scheduler, epoch, configs, logger, tb_writer, train_path)
         if (not configs.no_val) and (epoch % configs.checkpoint_freq == 0):
             val_dataloader = create_val_dataloader(configs)
             print('number of batches in val_dataloader: {}'.format(len(val_dataloader)))
             val_loss = validate(val_dataloader, model, configs)
             print('val_loss: {:.4e}'.format(val_loss))
+            with open(val_path, 'a') as file:
+                file.write(f"{val_loss}\n")
             if tb_writer is not None:
                 tb_writer.add_scalar('Val_loss', val_loss, epoch)
 
@@ -129,7 +133,7 @@ def cleanup():
     dist.destroy_process_group()
 
 
-def train_one_epoch(train_dataloader, model, optimizer, lr_scheduler, epoch, configs, logger, tb_writer):
+def train_one_epoch(train_dataloader, model, optimizer, lr_scheduler, epoch, configs, logger, tb_writer, train_path):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -181,6 +185,8 @@ def train_one_epoch(train_dataloader, model, optimizer, lr_scheduler, epoch, con
                 logger.info(progress.get_message(batch_idx))
 
         start_time = time.time()
+    with open(train_path, 'a') as file:
+        file.write(f"{losses.avg}\n")
 
 
 def validate(val_dataloader, model, configs):

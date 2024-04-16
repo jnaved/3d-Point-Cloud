@@ -11,7 +11,7 @@ import torch
 import numpy as np
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -126,16 +126,13 @@ if __name__ == '__main__':
             detections = post_processing(detections, test_configs.num_classes, test_configs.down_ratio,
                                          test_configs.peak_thresh)
             t2 = time_synchronized()
-
             detections = detections[0]  # only first batch
             # Draw prediction in the image
             bev_map = (bev_maps.squeeze().permute(1, 2, 0).numpy() * 255).astype(np.uint8)
             bev_map = cv2.resize(bev_map, (cnf.BEV_WIDTH, cnf.BEV_HEIGHT))
             bev_map = draw_predictions(bev_map, detections.copy(), test_configs.num_classes)
-
             # Rotate the bev_map
             bev_map = cv2.rotate(bev_map, cv2.ROTATE_180)
-
             img_path = metadatas['img_path'][0]
             img_rgb = img_rgbs[0].numpy()
             img_rgb = cv2.resize(img_rgb, (img_rgb.shape[1], img_rgb.shape[0]))
@@ -145,7 +142,6 @@ if __name__ == '__main__':
             if len(kitti_dets) > 0:
                 kitti_dets[:, 1:] = lidar_to_camera_box(kitti_dets[:, 1:], calib.V2C, calib.R0, calib.P2)
                 img_bgr = show_rgb_image_with_boxes(img_bgr, kitti_dets, calib)
-
             out_img = merge_rgb_to_bev(img_bgr, bev_map, output_width=test_configs.output_width)
 
             print('\tDone testing the {}th sample, time: {:.1f}ms, speed {:.2f}FPS'.format(batch_idx, (t2 - t1) * 1000,

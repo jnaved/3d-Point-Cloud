@@ -260,7 +260,7 @@ class OneCyclePolicy(ListScheduler):
         lr (float or list). Maximum learning rate in range. If a list of values is passed, they
             should correspond to parameter groups.
         epochs (int): The number of epochs to use during search.
-        momentum_rng (list). Optional upper and lower momentum values (may be both equal). Set to
+        momentum_rng (list). Optional upper and lower momentum values (maybe both equal). Set to
             None to run without momentum. Default: [0.85, 0.95]. If a list of lists is passed, they
             should correspond to parameter groups.
         phase_ratio (float): Fraction of epochs used for the increasing and decreasing phase of

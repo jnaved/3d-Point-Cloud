@@ -2,6 +2,7 @@ import os
 import torch
 import time
 
+
 def make_folder(folder_name):
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)

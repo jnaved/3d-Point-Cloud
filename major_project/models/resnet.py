@@ -10,13 +10,7 @@ import torch.utils.model_zoo as model_zoo
 
 BN_MOMENTUM = 0.1
 
-model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
-    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-}
+model_urls = {'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth'}
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -154,8 +148,7 @@ class PoseResNet(nn.Module):
                 nn.BatchNorm2d(planes * block.expansion, momentum=BN_MOMENTUM),
             )
 
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers = [block(self.inplanes, planes, stride, downsample)]
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes))
@@ -239,9 +232,6 @@ class PoseResNet(nn.Module):
                 final_layer = self.__getattr__(head)
                 for i, m in enumerate(final_layer.modules()):
                     if isinstance(m, nn.Conv2d):
-                        # nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                        # print('=> init {}.weight as normal(0, 0.001)'.format(name))
-                        # print('=> init {}.bias as 0'.format(name))
                         if m.weight.shape[0] == self.heads[head]:
                             if 'hm' in head:
                                 nn.init.constant_(m.bias, -2.19)

@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -126,10 +126,9 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar'):
         rotation = [0, 0, box[-1]]
 
         h, w, l = size[0], size[1], size[2]
-        trackletBox = np.array([  # in velodyne coordinates around zero point and without orientation yet
-            [-l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2], \
-            [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2], \
-            [0, 0, 0, 0, h, h, h, h]])
+        trackletBox = np.array([[-l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2],
+                                [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2],
+                                [0, 0, 0, 0, h, h, h, h]])
 
         # re-create 3D bounding box in velodyne coordinate system
         yaw = rotation[2]

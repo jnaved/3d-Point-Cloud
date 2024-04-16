@@ -10,7 +10,7 @@ import torch
 import numpy as np
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -19,7 +19,7 @@ from data_process.kitti_dataloader import create_test_dataloader
 from models.model_utils import create_model
 from utils.misc import make_folder, time_synchronized
 from utils.evaluation_utils import decode, post_processing
-from utils.torch_utils import _sigmoid
+from utils.torch_utils import sigmoid
 from calculate_accuracy import get_corners, calculate_iou
 
 
@@ -41,21 +41,9 @@ def parse_eval_configs():
                         help='If true, cuda is not used.')
     parser.add_argument('--gpu_idx', default=0, type=int,
                         help='GPU index to use.')
-    parser.add_argument('--num_samples', type=int, default=None,
-                        help='Take a subset of the dataset to run and debug')
-    parser.add_argument('--num_workers', type=int, default=1,
-                        help='Number of threads for loading data')
     parser.add_argument('--batch_size', type=int, default=1,
                         help='mini-batch size (default: 4)')
     parser.add_argument('--peak_thresh', type=float, default=0.2)
-    parser.add_argument('--save_test_output', action='store_true', default=True,
-                        help='If true, the output image of the testing phase will be saved')
-    parser.add_argument('--output_format', type=str, default='image', metavar='PATH',
-                        help='the type of the test output (support image or video)')
-    parser.add_argument('--output_video_fn', type=str, default='out_fpn_resnet_18', metavar='PATH',
-                        help='the video filename if the output format is video')
-    parser.add_argument('--output-width', type=int, default=608,
-                        help='the width of showing output, the height maybe vary')
 
     configs = edict(vars(parser.parse_args()))
     configs.pin_memory = True
@@ -89,10 +77,6 @@ def parse_eval_configs():
     configs.root_dir = '../'
     configs.dataset_dir = os.path.join(configs.root_dir, 'dataset', 'kitti')
 
-    if configs.save_test_output:
-        configs.results_dir = os.path.join(configs.root_dir, 'results/actual')
-        make_folder(configs.results_dir)
-
     return configs
 
 
@@ -120,17 +104,15 @@ if __name__ == '__main__':
     with torch.no_grad():
         avg_iou = 0
         for batch_idx, batch_data in enumerate(eval_dataloader):
-            if batch_idx >= 4000:
-                break
             metadatas, bev_maps, img_rgbs = batch_data
             input_bev_maps = bev_maps.to(configs.device, non_blocking=True).float()
             t1 = time_synchronized()
             outputs1 = model1(input_bev_maps)
             outputs2 = model2(input_bev_maps)
-            outputs1['hm_cen'] = _sigmoid(outputs1['hm_cen'])
-            outputs1['cen_offset'] = _sigmoid(outputs1['cen_offset'])
-            outputs2['hm_cen'] = _sigmoid(outputs2['hm_cen'])
-            outputs2['cen_offset'] = _sigmoid(outputs2['cen_offset'])
+            outputs1['hm_cen'] = sigmoid(outputs1['hm_cen'])
+            outputs1['cen_offset'] = sigmoid(outputs1['cen_offset'])
+            outputs2['hm_cen'] = sigmoid(outputs2['hm_cen'])
+            outputs2['cen_offset'] = sigmoid(outputs2['cen_offset'])
             # detections size (batch_size, K, 10)
             detections1 = decode(outputs1['hm_cen'], outputs1['cen_offset'], outputs1['direction'], outputs1['z_coor'],
                                  outputs1['dim'], K=configs.K)
@@ -163,7 +145,7 @@ if __name__ == '__main__':
                     gt_corners = get_corners(gt_x, gt_y, gt_w, gt_l, gt_yaw)
 
                     iou += calculate_iou(gt_corners, pred_corners)
-                    count += 1
+                    count += 1  
                 total_iou += iou / count if count != 0 else 0
             avg_iou += total_iou/count if count != 0 else 0
         print(avg_iou * 100/batch_idx)

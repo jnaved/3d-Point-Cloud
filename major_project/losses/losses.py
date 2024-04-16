@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -18,7 +18,7 @@ from utils.torch_utils import to_cpu, sigmoid
 def _gather_feat(feat, ind, mask=None):
     dim = feat.size(2)
     ind = ind.unsqueeze(2).expand(ind.size(0), ind.size(1), dim)
-    ind=ind.long()
+    ind = ind.long()
     feat = feat.gather(1, ind)
     if mask is not None:
         mask = mask.unsqueeze(2).expand_as(feat)
@@ -35,7 +35,6 @@ def _transpose_and_gather_feat(feat, ind):
 
 
 def _neg_loss(pred, gt, alpha=2, beta=4):
-
     pos_inds = gt.eq(1).float()
     neg_inds = gt.lt(1).float()
 
@@ -124,7 +123,8 @@ class Compute_Loss(nn.Module):
         outputs['cen_offset'] = sigmoid(outputs['cen_offset'])
 
         l_hm_cen = self.focal_loss.forward(outputs['hm_cen'], tg['hm_cen'])
-        l_cen_offset = self.l1_loss.forward(outputs['cen_offset'], tg['obj_mask'], tg['indices_center'], tg['cen_offset'])
+        l_cen_offset = self.l1_loss.forward(outputs['cen_offset'], tg['obj_mask'], tg['indices_center'],
+                                            tg['cen_offset'])
         l_direction = self.l1_loss.forward(outputs['direction'], tg['obj_mask'], tg['indices_center'], tg['direction'])
         # Apply the L1_loss balanced for z coor and dimension regression
         l_z_coor = self.l1_loss_balanced.forward(outputs['z_coor'], tg['obj_mask'], tg['indices_center'], tg['z_coor'])

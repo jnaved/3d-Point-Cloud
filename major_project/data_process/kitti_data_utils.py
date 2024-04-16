@@ -6,7 +6,7 @@ import numpy as np
 import cv2
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -68,20 +68,27 @@ class Object3d(object):
             return 4
 
     def print_object(self):
-        print('Type, truncation, occlusion, alpha: %s, %d, %d, %f' % \
-              (self.type, self.truncation, self.occlusion, self.alpha))
-        print('2d bbox (x0,y0,x1,y1): %f, %f, %f, %f' % \
-              (self.xmin, self.ymin, self.xmax, self.ymax))
-        print('3d bbox h,w,l: %f, %f, %f' % \
-              (self.h, self.w, self.l))
-        print('3d bbox location, ry: (%f, %f, %f), %f' % \
-              (self.t[0], self.t[1], self.t[2], self.ry))
+        print('Type, truncation, occlusion, alpha: %s, %d, %d, %f' % (
+            self.type, self.truncation, self.occlusion, self.alpha))
+        print('2d bbox (x0,y0,x1,y1): %f, %f, %f, %f' % (self.xmin, self.ymin, self.xmax, self.ymax))
+        print('3d bbox h,w,l: %f, %f, %f' % (self.h, self.w, self.l))
+        print('3d bbox location, ry: (%f, %f, %f), %f' % (self.t[0], self.t[1], self.t[2], self.ry))
 
     def to_kitti_format(self):
-        kitti_str = '%s %.2f %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f' \
-                    % (self.type, self.truncation, int(self.occlusion), self.alpha, self.box2d[0], self.box2d[1],
-                       self.box2d[2], self.box2d[3], self.h, self.w, self.l, self.t[0], self.t[1], self.t[2],
-                       self.ry, self.score)
+        kitti_str = '%s %.2f %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f' % (self.type,
+                                                                                                     self.truncation,
+                                                                                                     int(self.occlusion),
+                                                                                                     self.alpha,
+                                                                                                     self.box2d[0],
+                                                                                                     self.box2d[1],
+                                                                                                     self.box2d[2],
+                                                                                                     self.box2d[3],
+                                                                                                     self.h, self.w,
+                                                                                                     self.l, self.t[0],
+                                                                                                     self.t[1],
+                                                                                                     self.t[2],
+                                                                                                     self.ry,
+                                                                                                     self.score)
         return kitti_str
 
 
@@ -120,8 +127,6 @@ class Calibration(object):
         right x, down y, front z
 
         Ref (KITTI paper): http://www.cvlibs.net/publications/Geiger2013IJRR.pdf
-
-        TODO(rqi): do matrix multiplication only once for each projection.
     '''
 
     def __init__(self, calib_filepath):
@@ -219,7 +224,7 @@ def gen_hm_radius(heatmap, center, radius, k=1):
 
     masked_heatmap = heatmap[y - top:y + bottom, x - left:x + right]
     masked_gaussian = gaussian[radius - top:radius + bottom, radius - left:radius + right]
-    if min(masked_gaussian.shape) > 0 and min(masked_heatmap.shape) > 0:  # TODO debug
+    if min(masked_gaussian.shape) > 0 and min(masked_heatmap.shape) > 0:
         np.maximum(masked_heatmap, masked_gaussian * k, out=masked_heatmap)
 
     return heatmap
@@ -280,7 +285,7 @@ def box3d_corners_to_center(box3d_corner):
     return np.concatenate([h, w, l, xyz, yaw], axis=1).reshape(-1, 7)
 
 
-def box3d_center_to_conners(box3d_center):
+def box3d_center_to_corners(box3d_center):
     h, w, l, x, y, z, yaw = box3d_center
     Box = np.array([[-l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2],
                     [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2],

@@ -9,7 +9,7 @@ import cv2
 import torch
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -171,8 +171,8 @@ class KittiDataset(Dataset):
         z_coor = np.zeros((self.max_objects, 1), dtype=np.float32)
         dimension = np.zeros((self.max_objects, 3), dtype=np.float32)
 
-        indices_center = np.zeros((self.max_objects), dtype=int)
-        obj_mask = np.zeros((self.max_objects), dtype=np.uint8)
+        indices_center = np.zeros(self.max_objects, dtype=int)
+        obj_mask = np.zeros(self.max_objects, dtype=np.uint8)
 
         for k in range(num_objects):
             cls_id, x, y, z, h, w, l, yaw = labels[k]

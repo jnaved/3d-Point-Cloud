@@ -2,8 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
@@ -11,13 +9,7 @@ import torch.nn.functional as F
 
 BN_MOMENTUM = 0.1
 
-model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
-    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-}
+model_urls = {'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth'}
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -138,8 +130,7 @@ class PoseResNet(nn.Module):
                 nn.BatchNorm2d(planes * block.expansion, momentum=BN_MOMENTUM),
             )
 
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers = [block(self.inplanes, planes, stride, downsample)]
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes))
@@ -201,15 +192,11 @@ class PoseResNet(nn.Module):
 
     def init_weights(self, num_layers, pretrained=True):
         if pretrained:
-            # TODO: Check initial weights for head later
             for fpn_idx in [0, 1, 2]:  # 3 FPN layers
                 for head in self.heads:
                     final_layer = self.__getattr__('fpn{}_{}'.format(fpn_idx, head))
                     for i, m in enumerate(final_layer.modules()):
                         if isinstance(m, nn.Conv2d):
-                            # nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                            # print('=> init {}.weight as normal(0, 0.001)'.format(name))
-                            # print('=> init {}.bias as 0'.format(name))
                             if m.weight.shape[0] == self.heads[head]:
                                 if 'hm' in head:
                                     nn.init.constant_(m.bias, -2.19)
@@ -223,11 +210,7 @@ class PoseResNet(nn.Module):
             self.load_state_dict(pretrained_state_dict, strict=False)
 
 
-resnet_spec = {18: (BasicBlock, [2, 2, 2, 2]),
-               34: (BasicBlock, [3, 4, 6, 3]),
-               50: (Bottleneck, [3, 4, 6, 3]),
-               101: (Bottleneck, [3, 4, 23, 3]),
-               152: (Bottleneck, [3, 8, 36, 3])}
+resnet_spec = {18: (BasicBlock, [2, 2, 2, 2])}
 
 
 def get_pose_net(num_layers, heads, head_conv, imagenet_pretrained):

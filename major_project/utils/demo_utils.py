@@ -13,7 +13,7 @@ import torch
 import cv2
 
 src_dir = os.path.dirname(os.path.realpath(__file__))
-while not src_dir.endswith("major_project"):
+while not src_dir.endswith("jnaved"):
     src_dir = os.path.dirname(src_dir)
 if src_dir not in sys.path:
     sys.path.append(src_dir)
@@ -32,8 +32,8 @@ def parse_demo_configs():
     parser.add_argument('--pretrained_path', type=str,
                         default='../checkpoints/fpn_resnet_18/Model_fpn_resnet_18_epoch_200.pth', metavar='PATH',
                         help='the path of the pretrained checkpoint')
-    parser.add_argument('--foldername', type=str, default='2011_09_26_drive_0014_sync', metavar='FN',
-                        help='Folder name for demostration dataset')
+    parser.add_argument('--foldername', type=str, default=None, metavar='FN',
+                        help='Folder name for demonstration dataset')
     parser.add_argument('--K', type=int, default=50,
                         help='the number of top K')
     parser.add_argument('--no_cuda', action='store_true',
@@ -83,19 +83,6 @@ def parse_demo_configs():
     return configs
 
 
-def download_and_unzip(demo_dataset_dir, download_url):
-    filename = download_url.split('/')[-1]
-    filepath = os.path.join(demo_dataset_dir, filename)
-    if os.path.isfile(filepath):
-        print('The dataset have been downloaded')
-        return
-    print('\nDownloading data for demonstration...')
-    wget.download(download_url, filepath)
-    print('\nUnzipping the downloaded data...')
-    with zipfile.ZipFile(filepath, "r") as zip_ref:
-        zip_ref.extractall(os.path.join(demo_dataset_dir, filename[:-4]))
-
-
 def do_detect(configs, model, bevmap, is_front):
     if not is_front:
         bevmap = torch.flip(bevmap, [1, 2])
@@ -115,13 +102,3 @@ def do_detect(configs, model, bevmap, is_front):
     fps = 1 / (t2 - t1)
 
     return detections[0], bevmap, fps
-
-
-def write_credit(img, org_author=(500, 400), text_author='github.com/maudzung', org_fps=(50, 1000), fps=None):
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    fontScale = 1
-    color = (255, 255, 255)
-    thickness = 2
-
-    cv2.putText(img, text_author, org_author, font, fontScale, color, thickness, cv2.LINE_AA)
-    cv2.putText(img, 'Speed: {:.1f} FPS'.format(fps), org_fps, font, fontScale, color, thickness, cv2.LINE_AA)
