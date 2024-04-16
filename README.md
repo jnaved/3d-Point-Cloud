@@ -131,9 +131,15 @@ ${ROOT}
     │   └── visualization_utils.py
     ├── accuracy.py
     ├── calculate_accuracy.py
-    ├── demo_2_sides.py
+    ├── loss_plot.py    
+    ├── video_output.py
     ├── test.py
     └── train.py
+└── plot/
+    ├── __init__.py
+    ├── training_loss.txt
+    ├── validation_loss.txt
 ├── README.md 
+├── Technical_Details.md
 └── requirements.txt
 ```
